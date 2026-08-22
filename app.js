@@ -201,23 +201,50 @@ function drawTemplate(ctx, width, height) {
   ctx.restore();
 
   // top left title pill
-  const pillW = Math.min(width * 0.40, width - pad * 4);
+  const pillW = Math.min(width * 0.58, width - pad * 4);
   const pillH = Math.max(54, Math.round(height * 0.09));
+
   const pillX = pad * 2.2;
   const pillY = pad * 2.2;
+
   ctx.save();
+
   ctx.fillStyle = whitePanel;
-  roundRectPath(ctx, pillX, pillY, pillW, pillH, pillH / 2);
+
+  roundRectPath(
+    ctx,
+    pillX,
+    pillY,
+    pillW,
+    pillH,
+    pillH / 2
+  );
+
   ctx.fill();
+
   ctx.strokeStyle = accent;
   ctx.lineWidth = 3;
   ctx.stroke();
 
   ctx.fillStyle = darkText;
-  ctx.font = `700 ${large}px Inter, Arial, sans-serif`;
-  ctx.textBaseline = "middle";
-  ctx.fillText("I MET MIMORU!", pillX + pillH * 0.60, pillY + pillH / 2);
-  ctx.restore();
+
+// slightly smaller so English + Japanese fits
+const titleFontSize = Math.max(
+  20,
+  Math.round(width * 0.035)
+);
+
+ctx.font = `700 ${titleFontSize}px Inter, "Noto Sans JP", Arial, sans-serif`;
+
+ctx.textBaseline = "middle";
+
+ctx.fillText(
+  "I MET MIMORU (ミモル)!",
+  pillX + pillH * 0.38,
+  pillY + pillH / 2
+);
+
+ctx.restore();
 
   // top right event badge
   const badgeW = Math.min(width * 0.34, 340);
