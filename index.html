@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ff3f77">
+  <title>Meet Mimoru Photo Booth</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main class="shell">
+  <section class="hero">
+    <div><div class="eyebrow">IEEE RO-MAN 2026 • Robot Design Competition</div><h1>Meet <span>Mimoru</span></h1><p>Take a photo with Mimoru, save it to the shared gallery, and browse everyone’s moments.</p></div>
+    <img src="assets/mimoru.png" alt="Mimoru quadruped robot">
+  </section>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="camera">Take Photo</button>
+    <button class="tab" data-tab="gallery">Gallery</button>
+  </nav>
+
+  <section id="cameraPanel">
+    <div class="card">
+      <div class="camera-wrap">
+        <video id="camera" autoplay playsinline muted></video>
+        <canvas id="canvas" hidden></canvas>
+        <div id="placeholder" class="placeholder">📷<br><span>Tap Start Camera</span></div>
+      </div>
+      <div class="actions three">
+        <button id="startBtn" class="btn secondary">Start Camera</button>
+        <button id="switchBtn" class="btn secondary" disabled>Switch</button>
+        <button id="captureBtn" class="btn primary" disabled>Take Photo</button>
+      </div>
+      <p class="helper">Camera access requires HTTPS or localhost.</p>
+    </div>
+
+    <section id="preview" class="card preview" hidden>
+      <h2>Your photo</h2>
+      <img id="previewImg" alt="Captured photo preview">
+      <div class="actions">
+        <button id="retakeBtn" class="btn secondary">Retake</button>
+        <button id="uploadBtn" class="btn primary">Save to Gallery</button>
+      </div>
+      <div id="uploadStatus" class="status" aria-live="polite"></div>
+    </section>
+
+    <label class="consent"><input id="consent" type="checkbox"> <span>I understand this photo will be visible in the public event gallery.</span></label>
+  </section>
+
+  <section id="galleryPanel" hidden>
+    <div class="gallery-head"><div><div class="eyebrow">Shared moments</div><h2>Mimoru Photo Gallery</h2></div><button id="refreshBtn" class="btn secondary small">Refresh</button></div>
+    <div id="galleryStatus" class="status" aria-live="polite"></div>
+    <div id="gallery" class="gallery"></div>
+    <button id="moreBtn" class="btn secondary more" hidden>Load More</button>
+  </section>
+
+  <footer><b>#Meet<span>Mimoru</span></b><b>#RobotDesignCompetition</b><b>#IEEERoman2026</b></footer>
+</main>
+<script src="config.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
