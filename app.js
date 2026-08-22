@@ -183,7 +183,7 @@ function drawTemplate(ctx, width, height) {
   const pad = Math.max(18, Math.round(Math.min(width, height) * 0.024));
   const accent = "#ff3f77";
   const softAccent = "rgba(255, 63, 119, 0.18)";
-  const whitePanel = "rgba(255,255,255,0.88)";
+  const whitePanel = "rgba(255,255,255,0.90)";
   const darkText = "#16161f";
   const small = Math.max(16, Math.round(width * 0.022));
   const medium = Math.max(18, Math.round(width * 0.030));
@@ -203,7 +203,7 @@ function drawTemplate(ctx, width, height) {
   ctx.restore();
 
   // top title pill
-  const pillW = Math.min(width * 0.62, width - pad * 4);
+  const pillW = Math.min(width * 0.52, width - pad * 4);
   const pillH = Math.max(54, Math.round(height * 0.09));
   const pillX = pad * 2.2;
   const pillY = pad * 2.2;
@@ -218,31 +218,29 @@ function drawTemplate(ctx, width, height) {
   ctx.fillStyle = darkText;
   ctx.font = `700 ${large}px Inter, Arial, sans-serif`;
   ctx.textBaseline = "middle";
-  ctx.fillText("I MET", pillX + pillH * 0.40, pillY + pillH / 2);
-
-  const metWidth = ctx.measureText("I MET ").width;
-  ctx.fillStyle = accent;
-  ctx.fillText("MIMORU!", pillX + pillH * 0.40 + metWidth, pillY + pillH / 2);
+  ctx.fillText("MIMORU", pillX + pillH * 0.40, pillY + pillH / 2);
   ctx.restore();
 
-  // top right badge
-  const badgeW = Math.min(width * 0.28, 280);
-  const badgeH = Math.max(34, Math.round(height * 0.055));
+  // top right event badge - larger and more visible
+  const badgeW = Math.min(width * 0.34, 340);
+  const badgeH = Math.max(52, Math.round(height * 0.08));
   const badgeX = width - pad * 2.2 - badgeW;
-  const badgeY = pillY + 6;
+  const badgeY = pillY;
   ctx.save();
-  ctx.fillStyle = softAccent;
-  roundRectPath(ctx, badgeX, badgeY, badgeW, badgeH, badgeH / 2);
-  ctx.fill();
   ctx.fillStyle = accent;
-  ctx.font = `700 ${small}px Inter, Arial, sans-serif`;
+  roundRectPath(ctx, badgeX, badgeY, badgeW, badgeH, 18);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `800 ${small + 3}px Inter, Arial, sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText("IEEE RO-MAN 2026", badgeX + badgeW / 2, badgeY + badgeH / 2);
+  ctx.fillText("IEEE RO-MAN 2026", badgeX + badgeW / 2, badgeY + badgeH * 0.42);
+  ctx.font = `700 ${small}px Inter, Arial, sans-serif`;
+  ctx.fillText("Kitakyushu, Japan", badgeX + badgeW / 2, badgeY + badgeH * 0.74);
   ctx.restore();
 
-  // bottom footer card
-  const footerH = Math.max(110, Math.round(height * 0.165));
+  // bottom footer card - simplified
+  const footerH = Math.max(120, Math.round(height * 0.18));
   const footerW = width - pad * 4.2;
   const footerX = pad * 2.1;
   const footerY = height - footerH - pad * 2.1;
@@ -254,15 +252,17 @@ function drawTemplate(ctx, width, height) {
   ctx.lineWidth = 3;
   ctx.stroke();
 
-  ctx.fillStyle = darkText;
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = darkText;
   ctx.font = `800 ${medium}px Inter, Arial, sans-serif`;
-  ctx.fillText("Meet Mimoru Photo Booth", footerX + pad * 1.25, footerY + footerH * 0.40);
-
+  ctx.fillText("#MeetMimoru", footerX + pad * 1.9, footerY + footerH * 0.38);
   ctx.fillStyle = accent;
+  ctx.font = `700 ${small + 1}px Inter, Arial, sans-serif`;
+  ctx.fillText("#RobotDesignCompetition", footerX + pad * 1.9, footerY + footerH * 0.65);
+  ctx.fillStyle = darkText;
   ctx.font = `700 ${small}px Inter, Arial, sans-serif`;
-  ctx.fillText("#MeetMimoru   #RobotDesignCompetition   #IEEERoman2026", footerX + pad * 1.25, footerY + footerH * 0.72);
+  ctx.fillText("IEEE RO-MAN 2026 • Kitakyushu, Japan", footerX + pad * 1.9, footerY + footerH * 0.86);
   ctx.restore();
 
   // cute corner decorations
