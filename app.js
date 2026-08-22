@@ -216,7 +216,7 @@ function drawTemplate(ctx, width, height) {
   ctx.fillStyle = darkText;
   ctx.font = `700 ${large}px Inter, Arial, sans-serif`;
   ctx.textBaseline = "middle";
-  ctx.fillText("I MET MIMORU (ミモル)!", pillX + pillH * 0.40, pillY + pillH / 2);
+  ctx.fillText("I MET MIMORU!", pillX + pillH * 0.60, pillY + pillH / 2);
   ctx.restore();
 
   // top right event badge
