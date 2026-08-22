@@ -304,3 +304,12 @@ footer {
   .hero-robot { max-height: 135px; }
   .camera-wrap { aspect-ratio: 3 / 4; max-height: none; }
 }
+
+
+#camera.selfie {
+  transform: scaleX(-1);
+}
+
+#previewImage {
+  box-shadow: 0 10px 28px rgba(25, 12, 18, 0.12);
+}

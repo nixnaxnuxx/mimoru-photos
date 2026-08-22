@@ -72,6 +72,14 @@ function stopCamera() {
   camera.srcObject = null;
 }
 
+function updateCameraOrientation() {
+  if (state.facingMode === "user") {
+    camera.classList.add("selfie");
+  } else {
+    camera.classList.remove("selfie");
+  }
+}
+
 async function startCamera() {
   setStatus(uploadStatus, "Starting camera...");
 
@@ -101,6 +109,7 @@ async function startCamera() {
     camera.setAttribute("playsinline", "");
     camera.setAttribute("autoplay", "");
     camera.setAttribute("muted", "");
+    updateCameraOrientation();
 
     await new Promise(resolve => {
       if (camera.readyState >= 2 && camera.videoWidth > 0) {
@@ -129,7 +138,7 @@ async function startCamera() {
     captureBtn.disabled = false;
     switchBtn.disabled = false;
     startBtn.textContent = "Restart Camera";
-    setStatus(uploadStatus, "Camera ready!", "success");
+    setStatus(uploadStatus, "Camera ready! Selfie photos will be mirrored and framed.", "success");
   } catch (error) {
     console.error("Camera error:", error);
     cameraPlaceholder.hidden = false;
@@ -159,6 +168,119 @@ async function switchCamera() {
   await startCamera();
 }
 
+function roundRectPath(ctx, x, y, width, height, radius) {
+  const r = Math.min(radius, width / 2, height / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + width, y, x + width, y + height, r);
+  ctx.arcTo(x + width, y + height, x, y + height, r);
+  ctx.arcTo(x, y + height, x, y, r);
+  ctx.arcTo(x, y, x + width, y, r);
+  ctx.closePath();
+}
+
+function drawTemplate(ctx, width, height) {
+  const pad = Math.max(18, Math.round(Math.min(width, height) * 0.024));
+  const accent = "#ff3f77";
+  const softAccent = "rgba(255, 63, 119, 0.18)";
+  const whitePanel = "rgba(255,255,255,0.88)";
+  const darkText = "#16161f";
+  const small = Math.max(16, Math.round(width * 0.022));
+  const medium = Math.max(18, Math.round(width * 0.030));
+  const large = Math.max(26, Math.round(width * 0.052));
+
+  // outer double frame
+  ctx.save();
+  ctx.lineWidth = Math.max(6, Math.round(Math.min(width, height) * 0.008));
+  ctx.strokeStyle = accent;
+  roundRectPath(ctx, pad, pad, width - pad * 2, height - pad * 2, Math.max(22, pad));
+  ctx.stroke();
+
+  ctx.lineWidth = Math.max(2, Math.round(Math.min(width, height) * 0.003));
+  ctx.strokeStyle = "rgba(255,255,255,0.9)";
+  roundRectPath(ctx, pad * 1.75, pad * 1.75, width - pad * 3.5, height - pad * 3.5, Math.max(18, pad));
+  ctx.stroke();
+  ctx.restore();
+
+  // top title pill
+  const pillW = Math.min(width * 0.62, width - pad * 4);
+  const pillH = Math.max(54, Math.round(height * 0.09));
+  const pillX = pad * 2.2;
+  const pillY = pad * 2.2;
+  ctx.save();
+  ctx.fillStyle = whitePanel;
+  roundRectPath(ctx, pillX, pillY, pillW, pillH, pillH / 2);
+  ctx.fill();
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  ctx.fillStyle = darkText;
+  ctx.font = `700 ${large}px Inter, Arial, sans-serif`;
+  ctx.textBaseline = "middle";
+  ctx.fillText("I MET", pillX + pillH * 0.40, pillY + pillH / 2);
+
+  const metWidth = ctx.measureText("I MET ").width;
+  ctx.fillStyle = accent;
+  ctx.fillText("MIMORU!", pillX + pillH * 0.40 + metWidth, pillY + pillH / 2);
+  ctx.restore();
+
+  // top right badge
+  const badgeW = Math.min(width * 0.28, 280);
+  const badgeH = Math.max(34, Math.round(height * 0.055));
+  const badgeX = width - pad * 2.2 - badgeW;
+  const badgeY = pillY + 6;
+  ctx.save();
+  ctx.fillStyle = softAccent;
+  roundRectPath(ctx, badgeX, badgeY, badgeW, badgeH, badgeH / 2);
+  ctx.fill();
+  ctx.fillStyle = accent;
+  ctx.font = `700 ${small}px Inter, Arial, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("IEEE RO-MAN 2026", badgeX + badgeW / 2, badgeY + badgeH / 2);
+  ctx.restore();
+
+  // bottom footer card
+  const footerH = Math.max(110, Math.round(height * 0.165));
+  const footerW = width - pad * 4.2;
+  const footerX = pad * 2.1;
+  const footerY = height - footerH - pad * 2.1;
+  ctx.save();
+  ctx.fillStyle = whitePanel;
+  roundRectPath(ctx, footerX, footerY, footerW, footerH, Math.max(20, pad));
+  ctx.fill();
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  ctx.fillStyle = darkText;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+  ctx.font = `800 ${medium}px Inter, Arial, sans-serif`;
+  ctx.fillText("Meet Mimoru Photo Booth", footerX + pad * 1.25, footerY + footerH * 0.40);
+
+  ctx.fillStyle = accent;
+  ctx.font = `700 ${small}px Inter, Arial, sans-serif`;
+  ctx.fillText("#MeetMimoru   #RobotDesignCompetition   #IEEERoman2026", footerX + pad * 1.25, footerY + footerH * 0.72);
+  ctx.restore();
+
+  // cute corner decorations
+  ctx.save();
+  ctx.fillStyle = accent;
+  const dotR = Math.max(4, Math.round(Math.min(width, height) * 0.0055));
+  const startX = width - pad * 3.2;
+  const startY = height - footerH - pad * 4.3;
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 4; col++) {
+      ctx.beginPath();
+      ctx.arc(startX - col * dotR * 3.2, startY - row * dotR * 3.2, dotR, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
 function capturePhoto() {
   if (!state.stream) {
     setStatus(uploadStatus, "Start the camera first.", "error");
@@ -181,6 +303,7 @@ function capturePhoto() {
   const ctx = canvas.getContext("2d");
   ctx.save();
 
+  // Mirror front-facing camera so saved photo matches what the visitor sees.
   if (state.facingMode === "user") {
     ctx.translate(width, 0);
     ctx.scale(-1, 1);
@@ -189,6 +312,8 @@ function capturePhoto() {
   ctx.drawImage(camera, 0, 0, width, height);
   ctx.restore();
 
+  drawTemplate(ctx, width, height);
+
   canvas.toBlob(blob => {
     if (!blob) {
       setStatus(uploadStatus, "Could not capture photo.", "error");
@@ -196,17 +321,24 @@ function capturePhoto() {
     }
 
     state.blob = blob;
-    previewImage.src = URL.createObjectURL(blob);
+    const existing = previewImage.dataset.objectUrl;
+    if (existing) URL.revokeObjectURL(existing);
+    const url = URL.createObjectURL(blob);
+    previewImage.src = url;
+    previewImage.dataset.objectUrl = url;
     previewSection.hidden = false;
     previewSection.style.display = "block";
-    setStatus(uploadStatus, "");
+    setStatus(uploadStatus, "Photo captured with mirrored selfie view and Mimoru frame!", "success");
     previewSection.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, "image/jpeg", 0.88);
+  }, "image/jpeg", 0.92);
 }
 
 function retakePhoto() {
   state.blob = null;
+  const existing = previewImage.dataset.objectUrl;
+  if (existing) URL.revokeObjectURL(existing);
   previewImage.src = "";
+  previewImage.dataset.objectUrl = "";
   previewSection.hidden = true;
   previewSection.style.display = "none";
   setStatus(uploadStatus, "");
@@ -377,4 +509,5 @@ tabs.forEach(tab => {
 });
 
 window.addEventListener("beforeunload", stopCamera);
+updateCameraOrientation();
 console.log("Mimoru app loaded successfully.");
