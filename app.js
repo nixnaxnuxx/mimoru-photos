@@ -182,11 +182,9 @@ function roundRectPath(ctx, x, y, width, height, radius) {
 function drawTemplate(ctx, width, height) {
   const pad = Math.max(18, Math.round(Math.min(width, height) * 0.024));
   const accent = "#ff3f77";
-  const softAccent = "rgba(255, 63, 119, 0.18)";
   const whitePanel = "rgba(255,255,255,0.90)";
   const darkText = "#16161f";
   const small = Math.max(16, Math.round(width * 0.022));
-  const medium = Math.max(18, Math.round(width * 0.030));
   const large = Math.max(26, Math.round(width * 0.052));
 
   // outer double frame
@@ -202,8 +200,8 @@ function drawTemplate(ctx, width, height) {
   ctx.stroke();
   ctx.restore();
 
-  // top title pill
-  const pillW = Math.min(width * 0.52, width - pad * 4);
+  // top left title pill
+  const pillW = Math.min(width * 0.40, width - pad * 4);
   const pillH = Math.max(54, Math.round(height * 0.09));
   const pillX = pad * 2.2;
   const pillY = pad * 2.2;
@@ -221,7 +219,7 @@ function drawTemplate(ctx, width, height) {
   ctx.fillText("MIMORU", pillX + pillH * 0.40, pillY + pillH / 2);
   ctx.restore();
 
-  // top right event badge - larger and more visible
+  // top right event badge
   const badgeW = Math.min(width * 0.34, 340);
   const badgeH = Math.max(52, Math.round(height * 0.08));
   const badgeX = width - pad * 2.2 - badgeW;
@@ -238,9 +236,6 @@ function drawTemplate(ctx, width, height) {
   ctx.font = `700 ${small}px Inter, Arial, sans-serif`;
   ctx.fillText("Kitakyushu, Japan", badgeX + badgeW / 2, badgeY + badgeH * 0.74);
   ctx.restore();
-
-  // Clean template: no hashtags or photo-booth footer text.
-
 }
 
 function capturePhoto() {
