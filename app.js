@@ -216,7 +216,7 @@ function drawTemplate(ctx, width, height) {
   ctx.fillStyle = darkText;
   ctx.font = `700 ${large}px Inter, Arial, sans-serif`;
   ctx.textBaseline = "middle";
-  ctx.fillText("MIMORU", pillX + pillH * 0.40, pillY + pillH / 2);
+  ctx.fillText("I MET MIMORU!", pillX + pillH * 0.40, pillY + pillH / 2);
   ctx.restore();
 
   // top right event badge
@@ -285,7 +285,7 @@ function capturePhoto() {
     previewImage.dataset.objectUrl = url;
     previewSection.hidden = false;
     previewSection.style.display = "block";
-    setStatus(uploadStatus, "Photo captured with mirrored selfie view and Mimoru frame!", "success");
+    setStatus(uploadStatus, "Photo captured!", "success");
     previewSection.scrollIntoView({ behavior: "smooth", block: "start" });
   }, "image/jpeg", 0.92);
 }
