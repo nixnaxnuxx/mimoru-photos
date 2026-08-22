@@ -3,7 +3,28 @@ const c=window.MIMORU_CONFIG||{};const ok=c.supabaseUrl&&c.supabaseAnonKey&&!c.s
 const s={stream:null,facing:"user",blob:null,page:0,more:true,busy:false};
 const $=id=>document.getElementById(id);const camera=$("camera"),canvas=$("canvas"),placeholder=$("placeholder"),startBtn=$("startBtn"),switchBtn=$("switchBtn"),captureBtn=$("captureBtn"),preview=$("preview"),previewImg=$("previewImg"),retakeBtn=$("retakeBtn"),uploadBtn=$("uploadBtn"),consent=$("consent"),uploadStatus=$("uploadStatus"),galleryStatus=$("galleryStatus"),gallery=$("gallery"),moreBtn=$("moreBtn"),refreshBtn=$("refreshBtn"),cameraPanel=$("cameraPanel"),galleryPanel=$("galleryPanel"),tabs=[...document.querySelectorAll(".tab")];
 function status(el,t,k=""){el.textContent=t;el.className=("status "+k).trim()}function stop(){if(s.stream)s.stream.getTracks().forEach(t=>t.stop());s.stream=null}
-async function start(){stop();try{s.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:s.facing},width:{ideal:1920},height:{ideal:1080}},audio:false});camera.srcObject=s.stream;placeholder.hidden=true;captureBtn.disabled=false;switchBtn.disabled=false;startBtn.textContent="Restart Camera";status(uploadStatus,"")}catch(e){placeholder.hidden=false;status(uploadStatus,"Could not open the camera. Check permission and HTTPS.","error")}}
+async function start(){stop();try{s.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:s.facing},width:{ideal:1920},height:{ideal:1080}},audio:false});camera.srcObject = state.stream;
+
+// Wait until the camera metadata is ready
+await new Promise((resolve) => {
+  if (camera.readyState >= 1) {
+    resolve();
+  } else {
+    camera.addEventListener("loadedmetadata", resolve, { once: true });
+  }
+});
+
+// Important for mobile browsers
+try {
+  await camera.play();
+} catch (err) {
+  console.warn("Camera preview could not autoplay:", err);
+}
+
+cameraPlaceholder.hidden = true;
+captureBtn.disabled = false;
+switchBtn.disabled = false;
+startBtn.textContent = "Restart Camera";status(uploadStatus,"")}catch(e){placeholder.hidden=false;status(uploadStatus,"Could not open the camera. Check permission and HTTPS.","error")}}
 async function sw(){s.facing=s.facing==="user"?"environment":"user";await start()}
 function capture(){if(!s.stream)return;let w=camera.videoWidth||1280,h=camera.videoHeight||720;const scale=Math.min(1,1800/Math.max(w,h));w=Math.round(w*scale);h=Math.round(h*scale);canvas.width=w;canvas.height=h;const x=canvas.getContext("2d");if(s.facing==="user"){x.translate(w,0);x.scale(-1,1)}x.drawImage(camera,0,0,w,h);canvas.toBlob(b=>{if(!b)return;s.blob=b;previewImg.src=URL.createObjectURL(b);preview.hidden=false;preview.scrollIntoView({behavior:"smooth",block:"start"})},"image/jpeg",.88)}
 function retake(){s.blob=null;preview.hidden=true;previewImg.removeAttribute("src");status(uploadStatus,"")}
