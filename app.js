@@ -239,46 +239,8 @@ function drawTemplate(ctx, width, height) {
   ctx.fillText("Kitakyushu, Japan", badgeX + badgeW / 2, badgeY + badgeH * 0.74);
   ctx.restore();
 
-  // bottom footer card - simplified
-  const footerH = Math.max(120, Math.round(height * 0.18));
-  const footerW = width - pad * 4.2;
-  const footerX = pad * 2.1;
-  const footerY = height - footerH - pad * 2.1;
-  ctx.save();
-  ctx.fillStyle = whitePanel;
-  roundRectPath(ctx, footerX, footerY, footerW, footerH, Math.max(20, pad));
-  ctx.fill();
-  ctx.strokeStyle = accent;
-  ctx.lineWidth = 3;
-  ctx.stroke();
+  // Clean template: no hashtags or photo-booth footer text.
 
-  ctx.textAlign = "left";
-  ctx.textBaseline = "alphabetic";
-  ctx.fillStyle = darkText;
-  ctx.font = `800 ${medium}px Inter, Arial, sans-serif`;
-  ctx.fillText("#MeetMimoru", footerX + pad * 1.9, footerY + footerH * 0.38);
-  ctx.fillStyle = accent;
-  ctx.font = `700 ${small + 1}px Inter, Arial, sans-serif`;
-  ctx.fillText("#RobotDesignCompetition", footerX + pad * 1.9, footerY + footerH * 0.65);
-  ctx.fillStyle = darkText;
-  ctx.font = `700 ${small}px Inter, Arial, sans-serif`;
-  ctx.fillText("IEEE RO-MAN 2026 • Kitakyushu, Japan", footerX + pad * 1.9, footerY + footerH * 0.86);
-  ctx.restore();
-
-  // cute corner decorations
-  ctx.save();
-  ctx.fillStyle = accent;
-  const dotR = Math.max(4, Math.round(Math.min(width, height) * 0.0055));
-  const startX = width - pad * 3.2;
-  const startY = height - footerH - pad * 4.3;
-  for (let row = 0; row < 3; row++) {
-    for (let col = 0; col < 4; col++) {
-      ctx.beginPath();
-      ctx.arc(startX - col * dotR * 3.2, startY - row * dotR * 3.2, dotR, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-  ctx.restore();
 }
 
 function capturePhoto() {
