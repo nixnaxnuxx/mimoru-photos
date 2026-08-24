@@ -51,13 +51,22 @@ async function loadSupabase() {
     config.supabaseUrl &&
     config.supabaseAnonKey &&
     !config.supabaseUrl.includes("YOUR_") &&
-    !config.supabaseAnonKey.includes("YOUR_");
+    !config.supabaseAnonKey.includes("YOUR_") &&
+    !config.supabaseAnonKey.includes("PASTE_YOUR_");
 
-  if (!configured) return null;
+  if (!configured) {
+    console.error("Supabase is not configured. Check config.js.");
+    return null;
+  }
+
+  if (config.supabaseUrl.includes("/rest/v1")) {
+    console.error("supabaseUrl must be the project root URL, without /rest/v1/.");
+    return null;
+  }
 
   try {
     const mod = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm");
-    supabase = mod.createClient(config.supabaseUrl, config.supabaseAnonKey);
+    supabase = mod.createClient(config.supabaseUrl.replace(/\/$/, ""), config.supabaseAnonKey);
     return supabase;
   } catch (err) {
     console.error("Supabase load failed:", err);
@@ -201,50 +210,23 @@ function drawTemplate(ctx, width, height) {
   ctx.restore();
 
   // top left title pill
-  const pillW = Math.min(width * 0.58, width - pad * 4);
+  const pillW = Math.min(width * 0.40, width - pad * 4);
   const pillH = Math.max(54, Math.round(height * 0.09));
-
   const pillX = pad * 2.2;
   const pillY = pad * 2.2;
-
   ctx.save();
-
   ctx.fillStyle = whitePanel;
-
-  roundRectPath(
-    ctx,
-    pillX,
-    pillY,
-    pillW,
-    pillH,
-    pillH / 2
-  );
-
+  roundRectPath(ctx, pillX, pillY, pillW, pillH, pillH / 2);
   ctx.fill();
-
   ctx.strokeStyle = accent;
   ctx.lineWidth = 3;
   ctx.stroke();
 
   ctx.fillStyle = darkText;
-
-// slightly smaller so English + Japanese fits
-const titleFontSize = Math.max(
-  20,
-  Math.round(width * 0.035)
-);
-
-ctx.font = `700 ${titleFontSize}px Inter, "Noto Sans JP", Arial, sans-serif`;
-
-ctx.textBaseline = "middle";
-
-ctx.fillText(
-  "I MET MIMORU (ミモル)!",
-  pillX + pillH * 0.38,
-  pillY + pillH / 2
-);
-
-ctx.restore();
+  ctx.font = `700 ${large}px Inter, Arial, sans-serif`;
+  ctx.textBaseline = "middle";
+  ctx.fillText("MIMORU", pillX + pillH * 0.40, pillY + pillH / 2);
+  ctx.restore();
 
   // top right event badge
   const badgeW = Math.min(width * 0.34, 340);
@@ -312,7 +294,7 @@ function capturePhoto() {
     previewImage.dataset.objectUrl = url;
     previewSection.hidden = false;
     previewSection.style.display = "block";
-    setStatus(uploadStatus, "Photo captured!", "success");
+    setStatus(uploadStatus, "Photo captured with mirrored selfie view and Mimoru frame!", "success");
     previewSection.scrollIntoView({ behavior: "smooth", block: "start" });
   }, "image/jpeg", 0.92);
 }
@@ -341,14 +323,18 @@ async function uploadPhoto() {
 
   const client = await loadSupabase();
   if (!client) {
-    setStatus(uploadStatus, "Gallery is not connected yet. Configure Supabase in config.js.", "error");
+    setStatus(
+      uploadStatus,
+      "Gallery is not connected. Check config.js: use the project root URL and a browser-safe Publishable/anon key.",
+      "error"
+    );
     return;
   }
 
   if (state.uploading) return;
   state.uploading = true;
   uploadBtn.disabled = true;
-  setStatus(uploadStatus, "Saving photo...");
+  setStatus(uploadStatus, "1/2 Uploading photo to storage...");
 
   try {
     const randomId = crypto.randomUUID();
@@ -363,31 +349,48 @@ async function uploadPhoto() {
         upsert: false
       });
 
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error("STORAGE UPLOAD ERROR:", uploadError);
+      throw new Error(`Storage upload failed: ${uploadError.message}`);
+    }
 
     const { data: urlData } = client.storage
       .from(config.bucketName)
       .getPublicUrl(filePath);
 
-    const { error: dbError } = await client
+    if (!urlData || !urlData.publicUrl) {
+      throw new Error("Storage uploaded, but a public URL could not be created. Make sure the bucket is Public.");
+    }
+
+    setStatus(uploadStatus, "2/2 Adding photo to the gallery...");
+
+    const { data: insertedRows, error: dbError } = await client
       .from("photos")
       .insert({
         storage_path: filePath,
         public_url: urlData.publicUrl
-      });
+      })
+      .select("id, public_url, created_at")
+      .single();
 
-    if (dbError) throw dbError;
+    if (dbError) {
+      console.error("DATABASE INSERT ERROR:", dbError);
+      throw new Error(
+        `Photo reached Storage, but could not be added to the gallery table: ${dbError.message}`
+      );
+    }
 
-    setStatus(uploadStatus, "Photo saved! Opening the gallery...", "success");
+    console.log("Saved gallery row:", insertedRows);
+    setStatus(uploadStatus, "Saved! Your photo is now in the Mimoru gallery.", "success");
     consentCheck.checked = false;
 
     setTimeout(() => {
       showTab("gallery");
       refreshGallery();
-    }, 700);
+    }, 500);
   } catch (err) {
-    console.error("Upload error:", err);
-    setStatus(uploadStatus, `Upload failed: ${err.message || "Please try again."}`, "error");
+    console.error("SAVE TO GALLERY ERROR:", err);
+    setStatus(uploadStatus, err.message || "Save failed. Please try again.", "error");
   } finally {
     state.uploading = false;
     uploadBtn.disabled = false;
@@ -448,8 +451,8 @@ async function loadGallery(reset = false) {
     .range(start, end);
 
   if (error) {
-    console.error(error);
-    setStatus(galleryStatus, "Could not load gallery.", "error");
+    console.error("GALLERY LOAD ERROR:", error);
+    setStatus(galleryStatus, `Could not load gallery: ${error.message}`, "error");
     return;
   }
 
